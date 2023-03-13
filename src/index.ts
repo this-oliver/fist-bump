@@ -65,8 +65,10 @@ interface Package {
  * 
  * @returns package.json
  */
-function getPackageJson(): Package {
-  const root = getProjectRoot(process.cwd()) || process.cwd();
+function getPackageJson(directory?: string): Package {
+  directory = directory || process.cwd();
+  
+  const root = getProjectRoot(directory) || directory;
   const packageJsonContent = fs.readFileSync(path.join(root, "package.json"), "utf8");
   const packageJson = JSON.parse(packageJsonContent);
 
@@ -159,9 +161,6 @@ function updateVersion(bumpType: BumpType) {
   if (fs.existsSync("pnpm-lock.yaml")) {
     execute(`git add ${path.join(rootDir, "pnpm-lock.yaml")}`);
   }
-
-  // get raw commit message (no newlines)
-  //const formattedCommit = commit.replace(/[\r\n]+/g, '\n');
 
   // get new version
   const { version } = getPackageJson();

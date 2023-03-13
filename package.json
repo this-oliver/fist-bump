@@ -1,6 +1,6 @@
 {
   "name": "fist-bump",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "a script for bumping your package.json version based on your git commits",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
