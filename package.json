@@ -1,6 +1,6 @@
 {
   "name": "fist-bump",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a script for bumping your package.json version based on your git commits",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -19,6 +19,7 @@
     "name": "this-oliver",
     "email": "hello@oliverrr.net"
   },
+  "repository": "this-oliver/fist-bump",
   "license": "MIT",
   "dependencies": {
     "shelljs": "^0.8.5"
