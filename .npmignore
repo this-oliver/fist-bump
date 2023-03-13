@@ -1,4 +1,6 @@
 src
+package-lock.json
 .vscode
 .eslintrc
 .eslintignore
+*.tgz

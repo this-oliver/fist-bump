@@ -1,20 +1,38 @@
 {
   "name": "fist-bump",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "a script for bumping your package.json version based on your git commits",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "build": "tsc"
+    "start": "./lib/cli.js",
+    "build": "tsc",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "release": "npm run build && npm publish",
+    "preview": "npm run build && npm pack"
+  },
+  "bin": {
+    "fistbump": "./lib/cli.js"
   },
   "author": {
     "name": "this-oliver",
     "email": "hello@oliverrr.net"
   },
   "license": "MIT",
+  "dependencies": {
+    "shelljs": "^0.8.5"
+  },
   "devDependencies": {
     "@types/node": "^18.15.0",
-    "ts-node": "^10.9.1",
+    "@types/shelljs": "^0.8.11",
+    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "@typescript-eslint/parser": "^5.52.0",
+    "eslint": "^8.34.0",
+    "lint-staged": "^13.1.2",
     "typescript": "^4.9.5"
+  },
+  "lint-staged": {
+    "*": "npm run lint:fix"
   }
 }

@@ -12,14 +12,14 @@ fi
 
 # exit with success if the commit message is a merge
 if echo "$commit_msg" | grep -qE '^Merge'; then
-  echo "[fist-bump] commit message is a merge."
+  echo "[fist-bump] bump not needed (merge commit)"
   exit 0
 fi
 
 # exit with success if the commit message has already been bumped
 # by checking for the presence of a version number in square brackets
 if echo "$commit_msg" | grep -qE '\[[0-9]+\.[0-9]+\.[0-9]+\]'; then
-  echo "[fist-bump] commit message already bumped."
+  echo "[fist-bump] bump not needed (already bumped)"
   exit 0
 fi
 
@@ -29,7 +29,7 @@ if echo "$commit_msg" | grep -qE '(\[)?\s*(feature|config)\s*(\])?\s*:'; then
 elif echo "$commit_msg" | grep -qE '(\[)?\s*(patch|fix)\s*(\])?\s*:'; then
   version_type="patch"
 else
-  echo "[fist-bump] no version bump needed."
+  echo "[fist-bump] bump not needed (no bump type)"
   exit 0
 fi
 
