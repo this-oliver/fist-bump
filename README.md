@@ -25,8 +25,22 @@ By default, the following keywords are supported:
 | `minor` | `feat`, `feature`, `config` | `1.0.0` -> `1.1.0` |
 | `major` | `breaking`, `major`, `release` | `1.0.0` -> `2.0.0` |
 
+To customize the keywords, you can add a `fistbump` property to your `package.json` file and specify the keywords for each type of version bump.
 
-Prefix your commit messages with certain keywords will inform fist-bump to bump the version of your package.json.
+```json
+//package.json
+{
+ "fistbump": {
+  "keywords": {
+   "patch": ["fix", "patch"],
+   "minor": ["feature", "config"],
+   "major": ["breaking", "major"]
+  }
+ }
+}
+```
+
+> note: adding a `fistbump` property to your `package.json` file will override the default keywords.
 
 ## usage
 

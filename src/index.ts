@@ -48,6 +48,15 @@ function getProjectRoot(directory = process.cwd(), depth = 0): string | undefine
 }
 
 /**
+ * Configuration for fistbump.
+ */
+interface FistBumpConfig {
+  patch: string[];
+  minor: string[];
+  major: string[];
+}
+
+/**
  * Package.json representation.
  */
 interface Package {
@@ -58,6 +67,7 @@ interface Package {
   description?: string;
   license?: string;
   main?: string;
+  fistbump?: FistBumpConfig;
 }
 
 /**
@@ -79,7 +89,8 @@ function getPackageJson(directory?: string): Package {
     scripts: packageJson.scripts,
     author: packageJson.author,
     license: packageJson.license,
-    main: packageJson.main
+    main: packageJson.main,
+    fistbump: packageJson.fistbump
   };
 }
 
@@ -102,11 +113,13 @@ type BumpType = "patch" | "minor" | "major";
  * @returns string
  */
 function getBumpType(commit: string): BumpType | undefined {
-  if (_hasKeyword(BUMP_KEYWORDS.PATCH, commit)) {
+  const keywords = getKeywords();
+
+  if (_hasKeyword(keywords.patch, commit)) {
     return "patch";
-  } else if (_hasKeyword(BUMP_KEYWORDS.MINOR, commit)) {
+  } else if (_hasKeyword(keywords.minor, commit)) {
     return "minor";
-  } else if (_hasKeyword(BUMP_KEYWORDS.MAJOR, commit)) {
+  } else if (_hasKeyword(keywords.major, commit)) {
     return "major";
   }
 
@@ -133,6 +146,35 @@ function _hasKeyword(BUMP_KEYWORDS: string[], text: string): boolean {
   }
 
   return false;
+}
+
+/**
+ * Returns keywords from the package.json, if any. Otherwise, returns 
+ * default keywords from the config file.
+ * 
+ * @returns keywords
+ */
+function getKeywords(): FistBumpConfig {
+  let patch = BUMP_KEYWORDS.PATCH;
+  let minor = BUMP_KEYWORDS.MINOR;
+  let major = BUMP_KEYWORDS.MAJOR;
+
+  const { fistbump } = getPackageJson();
+
+  // return default keywords if fistbump is not defined
+  if(!fistbump || (fistbump.patch.length <= 0 && fistbump.minor.length <= 0 && fistbump.major.length <= 0)) {
+    return {
+      patch, minor, major 
+    };
+  }
+
+  patch = fistbump.patch || patch;
+  minor = fistbump.minor || minor;
+  major = fistbump.major || major;
+
+  return {
+    patch, minor, major
+  };
 }
 
 /**
