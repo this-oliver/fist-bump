@@ -69,6 +69,13 @@ The `tagAtBeginning` property is a boolean that will determine whether the versi
 | `false`        | `feature: added new feature (v1.1.0)` |
 | `true`         | `(v1.1.0) feature: added new feature` |
 
+## contributing
+
+Want to contribute?
+
+1. read the [contributing doc](./docs/contributing.md)
+2. open an issue or submit a pull request with your changes
+
 ## security
 
 If you discover a security vulnerability within this package, please send an e-mail to [hello@oliverrr.net](mailto:hello@oliverrr.net).
