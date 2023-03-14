@@ -19,16 +19,17 @@ npm install --save-dev fist-bump
 
 By default, the following keywords are supported:
 
-| type | keywords | bump |
-| --- | --- | --- |
-| `patch` | `fix`, `patch` | `1.0.0` -> `1.0.1` |
-| `minor` | `feat`, `feature`, `config` | `1.0.0` -> `1.1.0` |
+| type    | keywords                       | bump               |
+| ------- | ------------------------------ | ------------------ |
+| `patch` | `fix`, `patch`                 | `1.0.0` -> `1.0.1` |
+| `minor` | `feat`, `feature`, `config`    | `1.0.0` -> `1.1.0` |
 | `major` | `breaking`, `major`, `release` | `1.0.0` -> `2.0.0` |
 
 To customize the keywords, you can add a `fistbump` property to your `package.json` file and specify the keywords for each type of version bump.
 
+`in package.json`
+
 ```json
-//package.json
 {
  "fistbump": {
   "keywords": {
@@ -45,14 +46,16 @@ To customize the keywords, you can add a `fistbump` property to your `package.js
 ## usage
 
 ```bash
+# current version: 1.0.0
+
 # prefixing a commit message with the supported keywords
-git commit -m 'feature: add new feature'
+git commit -m 'feature: added new feature'
 
 # run fist bump to update the version of your package.json
 npx fistbump
 
-# square brackets are also supported
-git commit -m '[feature]: add new feature'
+# the new version => 1.1.0
+# the updated commit message => '[1.1.0] feature: added new feature'
 ```
 
 ## security
