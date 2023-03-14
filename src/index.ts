@@ -54,6 +54,7 @@ interface FistBumpConfig {
   patch: string[];
   minor: string[];
   major: string[];
+  tagAtBeginning?: boolean;
 }
 
 /**
@@ -178,6 +179,25 @@ function getKeywords(): FistBumpConfig {
 }
 
 /**
+ * Returns the new commit message based on the bump type.
+ * 
+ * @param commit - commit message
+ * @param version - new version
+ * @param tagFirst - place tage at the beginning of the commit message
+ */
+function _formatNewCommitMessage(commit: string, version: string, tagFirst?: boolean): string {
+  const lines = commit.split("\n");
+  
+  return lines.map((line, index) => {
+    if (index === 0) {
+      return tagFirst ? `(v${version}) ${line}` : `${line} (v${version})`;
+    }
+
+    return line;
+  }).join("\n");
+}
+
+/**
  * Updates the package.json file with the new version, adds the
  * `package.json` and `package-lock.json`/`pnpm-lock.yaml` to the git staging area,
  * and amends the commit message.
@@ -205,10 +225,10 @@ function updateVersion(bumpType: BumpType) {
   }
 
   // get new version
-  const { version } = getPackageJson();
+  const { version, fistbump } = getPackageJson();
 
   // build new commit message
-  const msg = `[${version}] ${commit}`;
+  const msg = _formatNewCommitMessage(commit, version, fistbump?.tagAtBeginning);
 
   // build git command
   const command = `git commit --amend --no-edit --no-verify -q -m '${msg}'`;
