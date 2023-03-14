@@ -2,129 +2,80 @@ import fs from "fs";
 import path from "path";
 import { BUMP_KEYWORDS } from "./config";
 import {
+  getProjectRoot,
+  getPackageJson,
+  getLatestCommit,
+  isValidRepository,
+  isMergeCommit,
   logMessage,
-  hasModule,
   execute,
   exit
 } from "./utils"
-
-type TagPosition = "start" | "end";
-
-/**
- * Configuration for fistbump.
- */
-interface FistBumpConfig {
-  /**
-   * Custom keywords for patch bumps.
-   */
-  patch: string[];
-  /**
-   * Custom keywords for minor bumps.
-   */
-  minor: string[];
-  /**
-   * Custom keywords for major bumps.
-   */
-  major: string[];
-  /**
-   * position of the tag in the commit message
-   */
-  position: TagPosition;
-}
+import type {
+  FistBumpConfig,
+  BumpType,
+  TagPosition 
+} from "./types";
 
 /**
- * Represents `package.json` file as an object.
- */
-interface Package {
-  name: string;
-  version: string;
-  scripts: unknown;
-  author?: string | unknown;
-  description?: string;
-  license?: string;
-  main?: string;
-  fistbump?: FistBumpConfig;
-}
+* Returns true if the text contains any of the keywords provided
+* in the pattern of `[keyword]:` or `keyword:` where keyword is
+* any of the keywords provided.
+* 
+* @param BUMP_KEYWORDS - list of keywords to check for
+* @param text - text to check
+* @returns boolean
+*/
+function _hasKeyword(BUMP_KEYWORDS: string[], text: string): boolean {
+  for (const keyword of BUMP_KEYWORDS) {
+    // replace 'sample' with keyword
+    const keywordRegex = new RegExp(`(\\[)?\\s*${keyword}\\s*(\\])?\\s*:`, "i");
 
-/**
- * Bump type.
- * 
- * - patch: 1.0.0 -> 1.0.1
- * - minor: 1.0.0 -> 1.1.0
- * - major: 1.0.0 -> 2.0.0
- */
-type BumpType = "patch" | "minor" | "major";
-
-/**
- * Throws an error if the script is not being run in a git repository
- * with npm or pnpm installed.
- */
-export function inspectDirectory() {
-  if (!hasModule("git")) {
-    throw new Error("Sorry, this script requires git");
+    if (keywordRegex.test(text)) {
+      return true;
+    }
   }
 
-  if (!hasModule("npm") || !hasModule("pnpm")) {
-    throw new Error("Sorry, this script requires npm or pnpm");
-  }
+  return false;
 }
 
 /**
- * Returns the path to the root directory of the project (where the package.json is located).
- * This function assumes that it is in the node_modules directory of the project
- * and will need to go up one directory at a time until it finds the package.json.
+ * Returns true if the commit message already contains an existing
+ * bump tag. 
  * 
- * @param directory - directory to start from (default: process.cwd())
- * @returns string
+ * For example:
+ * - square brackets: [1.0.0]
+ * - parentheses: (v1.0.0)
+ * 
+ * @param commit - commit message
  */
-function getProjectRoot(directory = process.cwd(), depth = 0): string | undefined {
-  const MAX_DEPTH = 5;
+function _hasTag(commit: string): boolean {
+  // look for square brackets - [1.0.0]
+  const squareBracket = /\[([0-9]+\.){2}[0-9]+\]/;
 
-  // return undefined if we've gone up too many directories
-  if (depth > MAX_DEPTH) {
-    return undefined;
-  }
+  // look for parentheses - (v1.0.0)
+  const parentheses = /\(([vV]?)([0-9]+\.){2}[0-9]+\)/;
 
-  // return the directory if it contains a package.json
-  if (fs.existsSync(path.join(directory, "package.json"))) {
-    return directory;
-  }
-
-  // otherwise, go up one directory and try again
-  return getProjectRoot(path.join(directory, ".."), depth + 1);
+  return squareBracket.test(commit) || parentheses.test(commit);
 }
 
 /**
- * Returns the package.json as an object.
+ * Returns the new commit message based on the bump type.
  * 
- * @returns package.json
+ * @param commit - commit message
+ * @param version - new version
+ * @param tagFirst - place tage at the beginning of the commit message
  */
-function getPackageJson(directory?: string): Package {
-  directory = directory || process.cwd();
+function _formatNewCommitMessage(commit: string, version: string, config: { position: TagPosition }): string {
+  const lines = commit.split("\n");
 
-  const root = getProjectRoot(directory) || directory;
-  const packageJsonContent = fs.readFileSync(path.join(root, "package.json"), "utf8");
-  const packageJson = JSON.parse(packageJsonContent);
+  return lines.map((line, index) => {
+    if (index === 0) {
+      return config.position === "end" ? `${line} (v${version})` : `(v${version}) ${line}`;
+    }
 
-  return {
-    name: packageJson.name,
-    version: packageJson.version,
-    description: packageJson.description,
-    scripts: packageJson.scripts,
-    author: packageJson.author,
-    license: packageJson.license,
-    main: packageJson.main,
-    fistbump: packageJson.fistbump
-  };
-}
-
-/**
- * Returns the latest commit message.
- * 
- * @returns string
- */
-function getLatestCommit(): string {
-  return execute("git log -1 --pretty=%B");
+    return line;
+  }).join("\n");
 }
 
 /**
@@ -191,54 +142,13 @@ function getBumpType(commit: string): BumpType | undefined {
 }
 
 /**
-* Returns true if the text contains any of the keywords provided
-* in the pattern of `[keyword]:` or `keyword:` where keyword is
-* any of the keywords provided.
-* 
-* @param BUMP_KEYWORDS - list of keywords to check for
-* @param text - text to check
-* @returns boolean
-*/
-function _hasKeyword(BUMP_KEYWORDS: string[], text: string): boolean {
-  for (const keyword of BUMP_KEYWORDS) {
-    // replace 'sample' with keyword
-    const keywordRegex = new RegExp(`(\\[)?\\s*${keyword}\\s*(\\])?\\s*:`, "i");
-
-    if (keywordRegex.test(text)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * Returns the new commit message based on the bump type.
- * 
- * @param commit - commit message
- * @param version - new version
- * @param tagFirst - place tage at the beginning of the commit message
- */
-function _formatNewCommitMessage(commit: string, version: string, config: { position: TagPosition }): string {
-  const lines = commit.split("\n");
-
-  return lines.map((line, index) => {
-    if (index === 0) {
-      return config.position === "end" ? `${line} (v${version})` : `(v${version}) ${line}`;
-    }
-
-    return line;
-  }).join("\n");
-}
-
-/**
  * Updates the package.json file with the new version, adds the
  * `package.json` and `package-lock.json`/`pnpm-lock.yaml` to the git staging area,
  * and amends the commit message.
  * 
  * @param bumpType - bump type
  */
-function updateVersion(bumpType: BumpType) {
+function bumpVersion(bumpType: BumpType): void {
   const commit = getLatestCommit();
   const rootDir = getProjectRoot() || process.cwd();
 
@@ -267,56 +177,28 @@ function updateVersion(bumpType: BumpType) {
   // build new commit message
   const msg = _formatNewCommitMessage(commit, version, { position: fistbump.position });
 
-  // build git command
+  // build command
   const command = `git commit --amend --no-edit --no-verify -q -m '${msg}'`;
 
-  // execute git command
+  // execute
   execute(command);
 }
 
 /**
- * Returns true if the commit message already contains an existing
- * bump tag. 
- * 
- * For example:
- * - square brackets: [1.0.0]
- * - parentheses: (v1.0.0)
- * 
- * @param commit - commit message
+ * Searches for the latest commit in a reposiroty and bumps 
+ * the version of the project if the commit message contains
+ * a bump keyword.
  */
-function _hasTag(commit: string): boolean {
-  // look for square brackets - [1.0.0]
-  const squareBracket = /\[([0-9]+\.){2}[0-9]+\]/;
-
-  // look for parentheses - (v1.0.0)
-  const parentheses = /\(([vV]?)([0-9]+\.){2}[0-9]+\)/;
-
-  return squareBracket.test(commit) || parentheses.test(commit);
-}
-
-/**
- * Returns true if the commit message is a merge commit.
- * @param commit - commit message
- */
-function _isMerge(commit: string): boolean {
-  // look for a 'Merge' at the beginning of the commit message
-  const mergeRegex = /^Merge/;
-  return mergeRegex.test(commit);
-}
-
-/**
- * Bumps the version of the package.
- */
-export function bump() {
+function runFistBump() {
   try {
     // throws error if required tools are not installed
-    inspectDirectory();
+    isValidRepository();
 
     // get commit
     const commit = getLatestCommit();
 
     // check if commit is a merge commit
-    if (_isMerge(commit)) {
+    if (isMergeCommit(commit)) {
       throw new Error("Bump not needed (merge commit)");
     }
 
@@ -333,7 +215,7 @@ export function bump() {
     }
 
     // update project
-    updateVersion(bumpType);
+    bumpVersion(bumpType);
 
     // exit with success
     const { version } = getPackageJson();
@@ -345,3 +227,5 @@ export function bump() {
     exit(1);
   }
 }
+
+export { runFistBump }
