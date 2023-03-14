@@ -13,7 +13,9 @@
     "preview": "npm run build && npm pack"
   },
   "bin": {
-    "fistbump": "./lib/cli.js"
+    "fistbump": "./lib/cli.js",
+    "fist-bump": "./lib/cli.js",
+    "fist-bump-hook": "./lib/hook.js"
   },
   "author": {
     "name": "this-oliver",
