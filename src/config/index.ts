@@ -8,6 +8,6 @@ export const PACKAGE_NAME = "fist-bump";
  */
 export const BUMP_KEYWORDS = {
   PATCH: [ "fix", "patch" ],
-  MINOR: [ "feat", "feature", "minor" ],
+  MINOR: [ "feature", "config", "minor" ],
   MAJOR: [ "breaking", "major", "release" ]
 }

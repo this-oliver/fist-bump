@@ -46,21 +46,23 @@ To customize this `fist-bump`, all you have to do is add a `fistbump` property t
 ```json
 {
  "fistbump": {
-  "patch": ["fix", "patch"],
-  "minor": ["feature", "config"],
-  "major": ["breaking", "major"],
-  "tagAtBeginning": true /* default: false */
+  "patch": [ "fix", "patch" ],
+  "minor": [ "feature", "config", "minor" ],
+  "major": [ "breaking", "major", "release" ],
+  "tagAtBeginning": false
  }
 }
 ```
 
-### `patch`, `minor`, `major`
+> note: the example above shows the configuration values
+
+### configuring the keywords - `patch`, `minor`, `major`
 
 The `patch`, `minor`, `major` properties are arrays of keywords that will be used to bump the version of your package.json. The keywords are case sensitive and will be matched against the `<keyword>:` or `[<keyword>]` pattern in your commit message.
 
 > note: adding custom keywords to the types will override their default keywords, respectively.
 
-### `tagAtBeginning`
+### configuring the tag position - `tagAtBeginning`
 
 The `tagAtBeginning` property is a boolean that will determine whether the version tag will be placed at the beginning of the commit message or at the end.
 
