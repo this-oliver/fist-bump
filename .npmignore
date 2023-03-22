@@ -1,4 +1,6 @@
+docs
 src
+tsconfig.json
 package-lock.json
 .vscode
 .eslintrc
