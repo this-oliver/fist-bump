@@ -239,13 +239,22 @@ function updateVersion(bumpType: BumpType) {
 
 /**
  * Returns true if the commit message already contains an existing
- * bump tag (e.g. [1.0.0])
+ * bump tag. 
+ * 
+ * For example:
+ * - square brackets: [1.0.0]
+ * - parentheses: (v1.0.0)
+ * 
  * @param commit - commit message
  */
 function _hasTag(commit: string): boolean {
-  // look for a version tag in the commit message
-  const versionRegex = /\[([0-9]+\.){2}[0-9]+\]/;
-  return versionRegex.test(commit);
+  // look for square brackets - [1.0.0]
+  const squareBracket = /\[([0-9]+\.){2}[0-9]+\]/;
+
+  // look for parentheses - (v1.0.0)
+  const parentheses = /\(([vV]?)([0-9]+\.){2}[0-9]+\)/;
+
+  return squareBracket.test(commit) || parentheses.test(commit);
 }
 
 /**
