@@ -8,6 +8,53 @@ import {
   exit
 } from "./utils"
 
+type TagPosition = "start" | "end";
+
+/**
+ * Configuration for fistbump.
+ */
+interface FistBumpConfig {
+  /**
+   * Custom keywords for patch bumps.
+   */
+  patch: string[];
+  /**
+   * Custom keywords for minor bumps.
+   */
+  minor: string[];
+  /**
+   * Custom keywords for major bumps.
+   */
+  major: string[];
+  /**
+   * position of the tag in the commit message
+   */
+  position: TagPosition;
+}
+
+/**
+ * Represents `package.json` file as an object.
+ */
+interface Package {
+  name: string;
+  version: string;
+  scripts: unknown;
+  author?: string | unknown;
+  description?: string;
+  license?: string;
+  main?: string;
+  fistbump?: FistBumpConfig;
+}
+
+/**
+ * Bump type.
+ * 
+ * - patch: 1.0.0 -> 1.0.1
+ * - minor: 1.0.0 -> 1.1.0
+ * - major: 1.0.0 -> 2.0.0
+ */
+type BumpType = "patch" | "minor" | "major";
+
 /**
  * Throws an error if the script is not being run in a git repository
  * with npm or pnpm installed.
@@ -48,37 +95,13 @@ function getProjectRoot(directory = process.cwd(), depth = 0): string | undefine
 }
 
 /**
- * Configuration for fistbump.
- */
-interface FistBumpConfig {
-  patch: string[];
-  minor: string[];
-  major: string[];
-  tagAtBeginning?: boolean;
-}
-
-/**
- * Package.json representation.
- */
-interface Package {
-  name: string;
-  version: string;
-  scripts: unknown;
-  author?: string | unknown;
-  description?: string;
-  license?: string;
-  main?: string;
-  fistbump?: FistBumpConfig;
-}
-
-/**
  * Returns the package.json as an object.
  * 
  * @returns package.json
  */
 function getPackageJson(directory?: string): Package {
   directory = directory || process.cwd();
-  
+
   const root = getProjectRoot(directory) || directory;
   const packageJsonContent = fs.readFileSync(path.join(root, "package.json"), "utf8");
   const packageJson = JSON.parse(packageJsonContent);
@@ -104,7 +127,47 @@ function getLatestCommit(): string {
   return execute("git log -1 --pretty=%B");
 }
 
-type BumpType = "patch" | "minor" | "major";
+/**
+ * Returns the fistbump configuration from the package.json file. If no
+ * configuration is provided, the default configuration is returned.
+ * 
+ * The default configuration is:
+ * 
+ * - patch: [ "fix", "patch" ]
+ * - minor: [ "feature", "config", "minor" ]
+ * - major: [ "breaking", "release", "major" ]
+ * - position: "start"
+ * 
+ * @returns keywords
+ */
+function getFistBumpConfig(): FistBumpConfig {
+  const config: FistBumpConfig = {
+    patch: BUMP_KEYWORDS.PATCH,
+    minor: BUMP_KEYWORDS.MINOR,
+    major: BUMP_KEYWORDS.MAJOR,
+    position: "start"
+  };
+
+  const { fistbump } = getPackageJson();
+
+  if (fistbump?.patch && fistbump.patch.length > 0) {
+    config.patch = fistbump.patch;
+  }
+
+  if (fistbump?.minor && fistbump.minor.length > 0) {
+    config.minor = fistbump.minor;
+  }
+
+  if (fistbump?.major && fistbump.major.length > 0) {
+    config.major = fistbump.major;
+  }
+
+  if (fistbump?.position) {
+    config.position = fistbump.position;
+  }
+
+  return config;
+}
 
 /**
  * Returns the bump type based on the commit message.
@@ -114,13 +177,13 @@ type BumpType = "patch" | "minor" | "major";
  * @returns string
  */
 function getBumpType(commit: string): BumpType | undefined {
-  const keywords = getKeywords();
+  const config: FistBumpConfig = getFistBumpConfig();
 
-  if (_hasKeyword(keywords.patch, commit)) {
+  if (_hasKeyword(config.patch, commit)) {
     return "patch";
-  } else if (_hasKeyword(keywords.minor, commit)) {
+  } else if (_hasKeyword(config.minor, commit)) {
     return "minor";
-  } else if (_hasKeyword(keywords.major, commit)) {
+  } else if (_hasKeyword(config.major, commit)) {
     return "major";
   }
 
@@ -150,47 +213,18 @@ function _hasKeyword(BUMP_KEYWORDS: string[], text: string): boolean {
 }
 
 /**
- * Returns keywords from the package.json, if any. Otherwise, returns 
- * default keywords from the config file.
- * 
- * @returns keywords
- */
-function getKeywords(): FistBumpConfig {
-  let patch = BUMP_KEYWORDS.PATCH;
-  let minor = BUMP_KEYWORDS.MINOR;
-  let major = BUMP_KEYWORDS.MAJOR;
-
-  const { fistbump } = getPackageJson();
-
-  // return default keywords if fistbump is not defined
-  if(!fistbump || (fistbump.patch.length <= 0 && fistbump.minor.length <= 0 && fistbump.major.length <= 0)) {
-    return {
-      patch, minor, major 
-    };
-  }
-
-  patch = fistbump.patch || patch;
-  minor = fistbump.minor || minor;
-  major = fistbump.major || major;
-
-  return {
-    patch, minor, major
-  };
-}
-
-/**
  * Returns the new commit message based on the bump type.
  * 
  * @param commit - commit message
  * @param version - new version
  * @param tagFirst - place tage at the beginning of the commit message
  */
-function _formatNewCommitMessage(commit: string, version: string, tagFirst?: boolean): string {
+function _formatNewCommitMessage(commit: string, version: string, config: { position: TagPosition }): string {
   const lines = commit.split("\n");
-  
+
   return lines.map((line, index) => {
     if (index === 0) {
-      return tagFirst ? `(v${version}) ${line}` : `${line} (v${version})`;
+      return config.position === "end" ? `${line} (v${version})` : `(v${version}) ${line}`;
     }
 
     return line;
@@ -225,10 +259,13 @@ function updateVersion(bumpType: BumpType) {
   }
 
   // get new version
-  const { version, fistbump } = getPackageJson();
+  const { version } = getPackageJson();
+
+  // get fistbump config
+  const fistbump: FistBumpConfig = getFistBumpConfig();
 
   // build new commit message
-  const msg = _formatNewCommitMessage(commit, version, fistbump?.tagAtBeginning);
+  const msg = _formatNewCommitMessage(commit, version, { position: fistbump.position });
 
   // build git command
   const command = `git commit --amend --no-edit --no-verify -q -m '${msg}'`;

@@ -31,14 +31,6 @@ npx fistbump
 # the updated commit message => '[1.1.0] feature: added new feature'
 ```
 
-By default, the following keywords are supported:
-
-| type    | keywords                       | bump               |
-| ------- | ------------------------------ | ------------------ |
-| `patch` | `fix`, `patch`                 | `1.0.0` -> `1.0.1` |
-| `minor` | `feat`, `feature`, `config`    | `1.0.0` -> `1.1.0` |
-| `major` | `breaking`, `major`, `release` | `1.0.0` -> `2.0.0` |
-
 ## configuration
 
 To customize this `fist-bump`, all you have to do is add a `fistbump` property to your `package.json` file.
@@ -46,30 +38,41 @@ To customize this `fist-bump`, all you have to do is add a `fistbump` property t
 ```json
 {
  "fistbump": {
-  "patch": [ "fix", "patch" ],
-  "minor": [ "feature", "config", "minor" ],
-  "major": [ "breaking", "major", "release" ],
-  "tagAtBeginning": false
+  "patch": [ "fix", "patch" ], // `1.0.0` -> `1.0.1`
+  "minor": [ "feature", "config", "minor" ], // `1.0.0` -> `1.1.0`
+  "major": [ "breaking", "release", "major" ], // `1.0.0` -> `2.0.0`
+  "position": "start" // `(v1.1.0) feature: added new feature`
  }
 }
 ```
 
-> note: the example above shows the configuration values
+> Note: the example above shows the configuration values
 
-### configuring the keywords - `patch`, `minor`, `major`
+### versioning keywords
 
-The `patch`, `minor`, `major` properties are arrays of keywords that will be used to bump the version of your package.json. The keywords are case sensitive and will be matched against the `<keyword>:` or `[<keyword>]` pattern in your commit message.
+The `patch`, `minor`, `major` properties represent the type of version bump that will be applied to your package.json (see [semantic versioning](https://docs.npmjs.com/about-semantic-versioning) for more details):
 
-> note: adding custom keywords to the types will override their default keywords, respectively.
+| type    | default keywords               | version bump       | description                               |
+| ------- | ------------------------------ | ------------------ | ----------------------------------------- |
+| `patch` | `fix`, `patch`                 | `1.0.0` -> `1.0.1` | bug fix, backwards compatible             |
+| `minor` | `feature`, `config`, `minor`   | `1.0.0` -> `1.1.0` | new feature, backwards compatible         |
+| `major` | `breaking`, `release`, `major` | `1.0.0` -> `2.0.0` | breaking change, not backwards compatible |
 
-### configuring the tag position - `tagAtBeginning`
+The keywords are case sensitive and will be matched against the following pattern in your commit message: `<keyword>:` or `[<keyword>]`. For example, the following commit messages will be matched against the `patch` keyword:
 
-The `tagAtBeginning` property is a boolean that will determine whether the version tag will be placed at the beginning of the commit message or at the end.
+- `fix: fixed a bug` => the keyword is `fix` which belongs to the `patch` version type
+- `feature|major: a whole new way to do stuff` => the keyword is `feature` which belongs to the `minor` version type even though it also matches the `major` keyword
 
-| tagAtBeginning | example commit message                |
-| -------------- | ------------------------------------- |
-| `false`        | `feature: added new feature (v1.1.0)` |
-| `true`         | `(v1.1.0) feature: added new feature` |
+> Note: adding custom keywords to will completely override their default keywords, respectively. in other words, if you add a custom `patch` keyword, the default `fix` and `patch` keywords will no longer be supported.
+
+### configuring the tag position - `position`
+
+The `position` property determins where the version tag will be placed in the commit message.
+
+| position | example commit message                |
+| -------- | ------------------------------------- |
+| `start`  | `(v1.1.0) feature: added new feature` |
+| `end`    | `feature: added new feature (v1.1.0)` |
 
 ## contributing
 
@@ -78,6 +81,10 @@ Want to contribute?
 1. read the [contributing doc](./docs/contributing.md)
 2. open an issue or submit a pull request with your changes
 
+## changelog
+
+To see what has changed between versions, check out the [changelog](./docs/changelog.md).
+
 ## security
 
-If you discover a security vulnerability within this package, please send an e-mail to [hello@oliverrr.net](mailto:hello@oliverrr.net).
+If you discover a security vulnerability, feel free to open an issue at [github.com/this-oliver/fist-bump/issues](https://github.com/this-oliver/fist-bump/issues). All security vulnerabilities will be promptly addressed.
