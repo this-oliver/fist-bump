@@ -1,26 +1,21 @@
 {
   "name": "fist-bump",
-  "version": "1.2.4",
+  "version": "1.3.0",
   "description": "a script for bumping your package.json version based on your git commits",
+  "repository": "this-oliver/fist-bump",
+  "license": "MIT",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "bin": {
+    "fistbump": "./lib/cli.js"
+  },
   "scripts": {
     "start": "./lib/cli.js",
     "build": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "release": "npm run build && npm publish",
-    "preview": "npm run build && npm pack"
+    "prepack": "npm run build"
   },
-  "bin": {
-    "fistbump": "./lib/cli.js"
-  },
-  "author": {
-    "name": "this-oliver",
-    "email": "hello@oliverrr.net"
-  },
-  "repository": "this-oliver/fist-bump",
-  "license": "MIT",
   "dependencies": {
     "shelljs": "^0.8.5"
   },

@@ -1,8 +1,10 @@
-docs
+# folders
 src
+.vscode
+
+# files
 tsconfig.json
 package-lock.json
-.vscode
-.eslintrc
 .eslintignore
+.eslintrc
 *.tgz

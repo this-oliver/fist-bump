@@ -30,10 +30,6 @@
     "object-curly-newline": [
       "error",
       {
-        "ObjectExpression": "always",
-        "ObjectPattern": {
-          "multiline": true
-        },
         "ImportDeclaration": {
           "multiline": true,
           "minProperties": 3
