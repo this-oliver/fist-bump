@@ -31,6 +31,8 @@ npx fistbump
 # the updated commit message => '[1.1.0] feature: added new feature'
 ```
 
+You can also run `fistbump` automatically by setting up a git hook: `npx fistbump -H` or `npx fistbump --hook`
+
 ## configuration
 
 To customize this `fist-bump`, all you have to do is add a `fistbump` property to your `package.json` file.
