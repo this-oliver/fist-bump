@@ -25,9 +25,8 @@ interface ExecuteOptions {
  */
 export function execute(command: string, options?: ExecuteOptions): string {
 
-  return shell.exec(command, {
-    silent: options?.silent ?? true // default to silent
-  }).stdout;
+  // default to silent
+  return shell.exec(command, { silent: options?.silent ?? true }).stdout;
 }
 
 /**
