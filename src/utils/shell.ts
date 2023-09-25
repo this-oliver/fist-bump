@@ -19,14 +19,32 @@ interface ExecuteOptions {
    * If true, the command will not be logged to the console
    */
   silent?: boolean;
+
+  /**
+   * Exit the process if the command fails
+   */
+  fatal?: boolean;
 }
 /**
  * Executes a shell command and returns the result
  */
 export function execute(command: string, options?: ExecuteOptions): string {
 
-  // default to silent
-  return shell.exec(command, { silent: options?.silent ?? true }).stdout;
+  let output: string;
+
+  try {
+    // default to silent
+    output = shell.exec(command, { silent: options?.silent ?? true, fatal: options?.fatal ?? false }).stdout;
+  } catch (error) {
+    if((error as Error).message.includes("Permission denied")){
+      throw new Error("Permission denied. Try running the command with sudo.");
+    }
+
+    throw error;
+  }
+
+  return output;
+
 }
 
 /**
