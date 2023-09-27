@@ -27,11 +27,13 @@ import type {
 * @returns boolean
 */
 function _hasKeyword(BUMP_KEYWORDS: string[], text: string): boolean {
-  for (const keyword of BUMP_KEYWORDS) {
-    // replace 'sample' with keyword
-    const keywordRegex = new RegExp(`(\\[)?\\s*${keyword}\\s*(\\])?\\s*:`, "i");
+  // remove leading and trailing whitespace
+  const trimmedText = text.trim();
 
-    if (keywordRegex.test(text)) {
+  for (const keyword of BUMP_KEYWORDS) {
+    const keywordRegex = new RegExp(`^(\\[)?\\s*${keyword}\\s*(\\])?\\s*:`, "i");
+
+    if (keywordRegex.test(trimmedText)) {
       return true;
     }
   }
