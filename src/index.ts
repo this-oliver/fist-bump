@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { BUMP_KEYWORDS } from "./config";
+import { BUMP_KEYWORDS, SKIP_KEYWORDS } from "./config";
 import {
   getProjectRoot,
   getPackageJson,
@@ -31,7 +31,7 @@ function _hasKeyword(BUMP_KEYWORDS: string[], text: string): boolean {
   const trimmedText = text.trim();
 
   for (const keyword of BUMP_KEYWORDS) {
-    const keywordRegex = new RegExp(`^(\\[)?\\s*${keyword}\\s*(\\])?\\s*:`, "i");
+    const keywordRegex = new RegExp(`^((\\[\\s*${keyword}\\s*\\])|(\\s*${keyword}\\s*:))`, "i");
 
     if (keywordRegex.test(trimmedText)) {
       return true;
@@ -51,7 +51,7 @@ function _hasKeyword(BUMP_KEYWORDS: string[], text: string): boolean {
  * 
  * @param commit - commit message
  */
-function _hasTag(commit: string): boolean {
+function _hasBumpTag(commit: string): boolean {
   // look for square brackets - [1.0.0]
   const squareBracket = /\[([0-9]+\.){2}[0-9]+\]/;
 
@@ -123,27 +123,6 @@ function getFistBumpConfig(): FistBumpConfig {
 }
 
 /**
- * Returns the bump type based on the commit message.
- * Possible values are 'patch', 'minor', or 'major'.
- * 
- * @param commit - commit message
- * @returns string
- */
-function getBumpType(commit: string): BumpType | undefined {
-  const config: FistBumpConfig = getFistBumpConfig();
-
-  if (_hasKeyword(config.patch, commit)) {
-    return "patch";
-  } else if (_hasKeyword(config.minor, commit)) {
-    return "minor";
-  } else if (_hasKeyword(config.major, commit)) {
-    return "major";
-  }
-
-  return undefined;
-}
-
-/**
  * Updates the package.json file with the new version, adds the
  * `package.json` and `package-lock.json`/`pnpm-lock.yaml` to the git staging area,
  * and amends the commit message.
@@ -192,6 +171,8 @@ function bumpVersion(bumpType: BumpType): void {
  * a bump keyword.
  */
 function runFistBump() {
+  const config: FistBumpConfig = getFistBumpConfig();
+  
   try {
     // throws error if required tools are not installed
     isValidRepository();
@@ -204,16 +185,27 @@ function runFistBump() {
       throw new Error("Bump not needed (merge commit)");
     }
 
+    // check if commit contains a skip keyword
+    if (_hasKeyword(SKIP_KEYWORDS, commit)) {
+      throw new Error("Bump not needed (skip keyword found)");
+    }
+
     // check if verison is already bumped
-    if (_hasTag(commit)) {
+    if (_hasBumpTag(commit)) {
       throw new Error("Bump not needed (already bumped)");
     }
 
     // get bump type
-    const bumpType = getBumpType(commit);
+    let bumpType: BumpType;
 
-    if (!bumpType) {
-      throw new Error("Bump not needed (no bump type)");
+    if (_hasKeyword(config.patch, commit)) {
+      bumpType = "patch";
+    } else if (_hasKeyword(config.minor, commit)) {
+      bumpType = "minor";
+    } else if (_hasKeyword(config.major, commit)) {
+      bumpType = "major";
+    } else {
+      throw new Error("Keyword not found");
     }
 
     // update project
