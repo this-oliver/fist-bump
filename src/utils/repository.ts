@@ -1,7 +1,50 @@
 import fs from "fs";
 import path from "path";
+import { BUMP_KEYWORDS } from "../config";
 import { hasModule, execute } from "./shell";
-import type { Package } from "../types";
+import type { FistBumpConfig, Package } from "../types";
+
+/**
+ * Returns the fistbump configuration from the package.json file. If no
+ * configuration is provided, the default configuration is returned.
+ * 
+ * The default configuration is:
+ * 
+ * - patch: [ "fix", "patch" ]
+ * - minor: [ "feature", "config", "minor" ]
+ * - major: [ "breaking", "release", "major" ]
+ * - position: "start"
+ * 
+ * @returns keywords
+ */
+function getFistBumpConfig(): FistBumpConfig {
+  const config: FistBumpConfig = {
+    patch: BUMP_KEYWORDS.PATCH,
+    minor: BUMP_KEYWORDS.MINOR,
+    major: BUMP_KEYWORDS.MAJOR,
+    position: "start"
+  };
+
+  const { fistbump } = getPackageJson();
+
+  if (fistbump?.patch && fistbump.patch.length > 0) {
+    config.patch = fistbump.patch;
+  }
+
+  if (fistbump?.minor && fistbump.minor.length > 0) {
+    config.minor = fistbump.minor;
+  }
+
+  if (fistbump?.major && fistbump.major.length > 0) {
+    config.major = fistbump.major;
+  }
+
+  if (fistbump?.position) {
+    config.position = fistbump.position;
+  }
+
+  return config;
+}
 
 /**
  * Returns the path to the root directory of the project (where the package.json is located).
@@ -86,6 +129,7 @@ function isValidRepository() {
 }
 
 export {
+  getFistBumpConfig,
   getProjectRoot,
   getPackageJson,
   getLatestCommit,
