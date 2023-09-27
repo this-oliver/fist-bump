@@ -1,6 +1,6 @@
 {
   "name": "fist-bump",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "a script for bumping your package.json version based on your git commits",
   "repository": "this-oliver/fist-bump",
   "license": "MIT",
