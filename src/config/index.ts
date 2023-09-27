@@ -11,3 +11,8 @@ export const BUMP_KEYWORDS = {
   MINOR: [ "feature", "config", "minor" ],
   MAJOR: [ "breaking", "major", "release" ]
 }
+
+/**
+ * Keywords to skip bumping.
+ */
+export const SKIP_KEYWORDS = [ "skip", "wip" ];
