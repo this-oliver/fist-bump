@@ -115,17 +115,17 @@ function isMergeCommit(commit: string): boolean {
 }
 
 /**
- * Throws an error if the script is not being run in a git repository
- * with npm or pnpm installed.
+ * Returns true if the script is being run in a git repository.
  */
-function isValidRepository() {
-  if (!hasModule("git")) {
-    throw new Error("Sorry, this script requires git");
-  }
+function isGitRepo(): boolean {
+  return hasModule("git");
+}
 
-  if (!hasModule("npm") || !hasModule("pnpm")) {
-    throw new Error("Sorry, this script requires npm or pnpm");
-  }
+/**
+ * Returns true if the script is being run with npm or pnpm installed.
+ */
+function isNpmRepo(): boolean {
+  return hasModule("npm");
 }
 
 export {
@@ -134,5 +134,6 @@ export {
   getPackageJson,
   getLatestCommit,
   isMergeCommit,
-  isValidRepository
+  isGitRepo,
+  isNpmRepo
 }

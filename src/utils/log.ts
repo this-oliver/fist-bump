@@ -8,7 +8,7 @@ type LogType = "error" | "warn";
  * @param logType - type of log message
  * @returns string
  */
-export function logMessage(message: string, logType?: LogType): string {
+function logMessage(message: string, logType?: LogType): string {
   let msg: string;
 
   if (logType === "error") {
@@ -23,3 +23,5 @@ export function logMessage(message: string, logType?: LogType): string {
 
   return msg;
 }
+
+export { logMessage }

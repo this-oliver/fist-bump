@@ -1,12 +1,12 @@
 /**
  * Package name.
  */
-export const PACKAGE_NAME = "fist-bump";
+const PACKAGE_NAME = "fist-bump";
 
 /**
  * Default keywords for bumping.
  */
-export const BUMP_KEYWORDS = {
+const BUMP_KEYWORDS = {
   PATCH: [ "fix", "patch" ],
   MINOR: [ "feature", "config", "minor" ],
   MAJOR: [ "breaking", "major", "release" ]
@@ -15,4 +15,6 @@ export const BUMP_KEYWORDS = {
 /**
  * Keywords to skip bumping.
  */
-export const SKIP_KEYWORDS = [ "skip", "wip" ];
+const SKIP_KEYWORDS = [ "skip", "wip" ];
+
+export { PACKAGE_NAME, BUMP_KEYWORDS, SKIP_KEYWORDS }
