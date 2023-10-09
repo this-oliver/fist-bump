@@ -1,4 +1,19 @@
+/**
+ * Tag position.
+ * 
+ * - start: bump tag is at the start of the commit message header (default)
+ * - end: bump tag is at the end of the commit message header
+ */
 type TagPosition = "start" | "end";
+
+/**
+ * Bump type.
+ * 
+ * - patch: 1.0.0 -> 1.0.1
+ * - minor: 1.0.0 -> 1.1.0
+ * - major: 1.0.0 -> 2.0.0
+ */
+type BumpType = "patch" | "minor" | "major";
 
 /**
  * Configuration for fistbump.
@@ -21,15 +36,6 @@ interface FistBumpConfig {
    */
   position: TagPosition;
 }
-
-/**
- * Bump type.
- * 
- * - patch: 1.0.0 -> 1.0.1
- * - minor: 1.0.0 -> 1.1.0
- * - major: 1.0.0 -> 2.0.0
- */
-type BumpType = "patch" | "minor" | "major";
 
 /**
  * Represents `package.json` file as an object.

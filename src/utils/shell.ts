@@ -9,10 +9,9 @@ shell.config.fatal = true;
  * @param name - name of the module to check for
  * @returns boolean
  */
-export function hasModule(name: string): boolean {
+function hasModule(name: string): boolean {
   return shell.which(name) !== null;
 }
-
 
 interface ExecuteOptions {
   /**
@@ -23,7 +22,7 @@ interface ExecuteOptions {
 /**
  * Executes a shell command and returns the result
  */
-export function execute(command: string, options?: ExecuteOptions): string {
+function execute(command: string, options?: ExecuteOptions): string {
 
   // default to silent
   return shell.exec(command, { silent: options?.silent ?? true }).stdout;
@@ -34,6 +33,8 @@ export function execute(command: string, options?: ExecuteOptions): string {
  * 
  * @param code - status code
  */
-export function exit(code: number): void {
+function exit(code: number): void {
   shell.exit(code);
 }
+
+export { hasModule, execute, exit }
