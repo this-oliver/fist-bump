@@ -2,7 +2,7 @@ import type { TagPosition } from "../types";
 
 /**
 * Returns true if the text contains any of the keywords provided
-* in the pattern of `[keyword]:` or `keyword:` where keyword is
+* in the pattern of `[keyword]` or `keyword:` where keyword is
 * any of the keywords provided.
 * 
 * @param BUMP_KEYWORDS - list of keywords to check for
@@ -29,14 +29,14 @@ function hasKeyword(BUMP_KEYWORDS: string[], text: string): boolean {
  * bump tag. 
  * 
  * For example:
- * - square brackets: [1.0.0]
+ * - square brackets: [v1.0.0]
  * - parentheses: (v1.0.0)
  * 
  * @param commit - commit message
  */
 function hasBumpTag(commit: string): boolean {
-  // look for square brackets - [1.0.0]
-  const squareBracket = /\[([0-9]+\.){2}[0-9]+\]/;
+  // look for square brackets - [v1.0.0]
+  const squareBracket = /\[([vV]?)([0-9]+\.){2}[0-9]+\]/;
 
   // look for parentheses - (v1.0.0)
   const parentheses = /\(([vV]?)([0-9]+\.){2}[0-9]+\)/;
@@ -49,14 +49,17 @@ function hasBumpTag(commit: string): boolean {
  * 
  * @param commit - commit message
  * @param version - new version
- * @param tagFirst - place tage at the beginning of the commit message
+ * @param config - configuration
+ * @param config.position - position of the tag in the commit message (default: "start")
+ * @param config.squareBracket - use square brackets instead of parentheses (default: false)
  */
-function formatNewCommitMessage(commit: string, version: string, config: { position: TagPosition }): string {
+function formatNewCommitMessage(commit: string, version: string, config?: { position?: TagPosition, squareBracket?: boolean }): string {
   const lines = commit.split("\n");
+  const tag = config?.squareBracket ? `[v${version}]` : `(v${version})`;
 
   return lines.map((line, index) => {
     if (index === 0) {
-      return config.position === "end" ? `${line} (v${version})` : `(v${version}) ${line}`;
+      return config?.position === "end" ? `${line} ${tag}` : `${tag} ${line}`;
     }
 
     return line;
