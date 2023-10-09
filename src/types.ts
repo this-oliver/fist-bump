@@ -32,7 +32,7 @@ interface FistBumpConfig {
    */
   major: string[];
   /**
-   * position of the tag in the commit message
+   * Position of the tag in the commit message
    */
   position: TagPosition;
 }
