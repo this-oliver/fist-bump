@@ -9,7 +9,7 @@ on:
 
 # workflow jobs
 jobs:
-  unit-test:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
