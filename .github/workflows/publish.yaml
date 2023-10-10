@@ -1,0 +1,23 @@
+# workflow name
+name: publish-package
+
+# workflow triggers
+on:
+  push:
+    branches:
+      - main
+
+# workflow jobs
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "14"
+      - run: npm ci
+      - run: npm run test
+      - run: npm run build
+      - run: npm config set '//registry.npmjs.org/:_authToken' "${{ secrets.NPM_TOKEN }}"
+      - run: npm publish
