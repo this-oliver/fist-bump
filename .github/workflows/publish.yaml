@@ -16,8 +16,11 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "14"
-      - run: npm ci
-      - run: npm run test
-      - run: npm run build
-      - run: npm config set '//registry.npmjs.org/:_authToken' "${{ secrets.NPM_TOKEN }}"
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - run: pnpm install
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm config set '//registry.npmjs.org/:_authToken' "${{ secrets.NPM_TOKEN }}"
       - run: npm publish
