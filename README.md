@@ -1,5 +1,7 @@
 # fist-bump 👊
 
+> [!NOTE] Use [googleapis/release-please](https://github.com/googleapis/release-please) instaed. It's time tested and maintained unlike this hobby project ;)
+
 > Bump the version of your package.json based on your commit messages
 
 ## features
